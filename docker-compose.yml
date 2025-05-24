@@ -3,20 +3,24 @@ version: '3.8'
 services:
   postgres-db:
     image: 'postgres:15'
-    restart: always
+    container_name: ecommerce-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=toor
+      - POSTGRES_MULTIPLE_DATABASES=product_db,order_db
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: toor
     volumes:
-      - ./postgresql:/docker-entrypoint-initdb.d/:ro
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    command:
-      - "postgres"
-      - "-c"
-      - "wal_level=logical"
+      - postgres-data:/var/lib/postgresql/data
+      - ./config-server/src/main/resources/config:/docker-entrypoint-initdb.d
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   prometheus:
     image: prom/prometheus:latest
@@ -45,7 +49,10 @@ services:
 
 volumes:
   grafana-storage:
+  postgres-data:
 
 networks:
   monitoring:
+    driver: bridge
+  ecommerce-network:
     driver: bridge
