@@ -123,6 +123,39 @@ To view system metrics on Grafana:
    - Successfully deleted product
    - Response: 200 OK
 
+### Inter-Service Communication
+
+#### Service Discovery and Configuration
+- Eureka Server (Port 8761) manages service registration and discovery
+- Config Server (Port 8888) provides centralized configuration management
+- Each service registers itself with Eureka Server on startup
+- Services fetch their configurations from Config Server
+
+#### Communication Patterns
+1. **Synchronous Communication**:
+   - REST APIs for direct service-to-service communication
+   - Feign Client for declarative REST client implementation
+   - Example: Order Service communicates with Product Service using Feign Client
+
+2. **API Gateway**:
+   - All external requests are routed through the API Gateway
+   - Handles routing, load balancing, and cross-cutting concerns
+   - Provides a single entry point for all services
+
+3. **Error Handling**:
+   - Comprehensive error handling between services
+   - Proper HTTP response codes and error messages
+   - Transaction management for distributed operations
+
+4. **Service Integration Example**:
+   ```java
+   @FeignClient(name = "product-service")
+   public interface ProductServiceClient {
+       @GetMapping("/{id}")
+       ResponseEntity<ApiResponse<ProductDTO>> getProduct(@PathVariable Long id);
+   }
+   ```
+
 #### Order Service Tests
 1. Create Order ✅
    - Successfully created order with ID: 2
@@ -266,6 +299,39 @@ Grafana üzerinden sistem metriklerini görüntülemek için:
 5. Ürün Silme ✅
    - Ürün başarıyla silindi
    - Yanıt: 200 OK
+
+### Servisler Arası İletişim
+
+#### Servis Keşfi ve Konfigürasyon
+- Eureka Server (Port 8761) servis kaydı ve keşfini yönetir
+- Config Server (Port 8888) merkezi konfigürasyon yönetimi sağlar
+- Her servis başlangıçta kendini Eureka Server'a kaydeder
+- Servisler konfigürasyonlarını Config Server'dan alır
+
+#### İletişim Desenleri
+1. **Senkron İletişim**:
+   - Servisler arası doğrudan iletişim için REST API'ler
+   - Deklaratif REST istemcisi için Feign Client kullanımı
+   - Örnek: Order Service, Product Service ile Feign Client kullanarak iletişim kurar
+
+2. **API Gateway**:
+   - Tüm dış istekler API Gateway üzerinden yönlendirilir
+   - Yönlendirme, yük dengeleme ve cross-cutting concerns'leri yönetir
+   - Tüm servisler için tek giriş noktası sağlar
+
+3. **Hata Yönetimi**:
+   - Servisler arası kapsamlı hata yönetimi
+   - Uygun HTTP yanıt kodları ve hata mesajları
+   - Dağıtık işlemler için transaction yönetimi
+
+4. **Servis Entegrasyon Örneği**:
+   ```java
+   @FeignClient(name = "product-service")
+   public interface ProductServiceClient {
+       @GetMapping("/{id}")
+       ResponseEntity<ApiResponse<ProductDTO>> getProduct(@PathVariable Long id);
+   }
+   ```
 
 #### Sipariş Servisi Testleri
 1. Sipariş Oluşturma ✅
